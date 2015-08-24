@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html >
+  <head>
+    <meta charset="UTF-8">
+    <title>Chat Home</title>
+    <link rel="stylesheet" href="css/custom-styles.css">
+	<style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; }
+	  .fullContainer{margin:0 !important;padding:0 !important;}
+      #chatbox{ background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%;z-index:3; }
+      #chatbox input { border: 0; padding: 1%; width: 88%; margin-right: .5%; font-weight:bold;}
+      #chatbox button { width: 9%;padding: 1%; font-size:1.3vmax; margin-left:0.5%;font-weight:bold}
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages li { padding: 5px 10px; color: lightgoldenrodyellow; font-weight: bold;}
+	  #messages li > span { color: black; font-weight: bold;}
+	  #messages li:nth-child(odd) { background:#3fcf92;}
+	  #messages li:nth-child(even){ background:#489b9a;}
+	  .alert-success{bottom: 20%;position: fixed;right: 0; width: 40%;display:none;}
+	  .alert-danger{bottom: 10%;position: fixed;right: 0; width: 40%;display:none;}
+	  
+    </style>
+	<link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+	
+  </head>
+
+  <body>
+
+    <div class="wrapper">
+		<div class="container-fluid fullContainer">
+			<ul id="messages"></ul>
+			<div id="chatbox">
+			  <input id="m" autocomplete="off" onkeyup="performValidations(event)" />
+			  <button onclick="submitChatMessage()" class="btn btn-primary btn-md">Send</button>
+			</div>
+			<div class="alert alert-success fade in">
+				<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+				<strong>A User Connected :</strong><span></span>
+			</div>
+			<div class="alert alert-danger fade in">
+			  <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+			  <strong>A User Disconnected :</strong><span></span>
+			</div>
+		</div>
+		<ul class="bg-bubbles">
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+		</ul>
+	</div>
+    <script src="js/socket.io.js"></script>
+	<script src="js/jquery-1.11.3.min.js"></script>
+	<script src="js/bootstrap.js"></script>
+	<script>
+		/* Function to get the URL Parameters*/
+			var urlParam = function(name){
+				var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+				if (results==null){
+					return null;
+				}
+				else{
+					return results[1] || 0;
+				}
+			}
+			
+			var chat_name		=	urlParam('chat_name');
+			var socket 			= 	io.connect('', {query:'name='+chat_name});		//To set request parameters into query.
+		/* Function to submit chat Messages along with sender in JSON Format*/	
+			function submitChatMessage(){
+				var nick_name	=	urlParam('chat_name');
+				var sentJson	=	{sender:'',msg:''};
+				sentJson.sender	=	nick_name;
+				sentJson.msg	=	$('#m').val();
+				socket.emit('chat message',sentJson);
+				$('#m').val('');
+				debugger;
+				return false;
+			}
+			function performValidations(e){
+				var key = e.which || e.keyCode;  // Use either which or keyCode, depending on browser support
+				if(key ===13){
+					submitChatMessage();
+				}
+			}
+			socket.on('return message', function(msg){
+				var htmlEqv	=	jQuery.parseHTML(msg);
+				var listEle	=	$('<li></li>');
+				listEle.append(htmlEqv);
+				$('#messages').append(listEle);
+			});
+			socket.on('user count', function(msg){
+				if(msg.isconnected){
+					$('.alert-success > span').html('');
+					$('.alert-success > span').append(msg.name+' joined the chat, total no. of participants are '+msg.count);
+					$('.alert-success').fadeIn(1500).delay(2000).fadeOut(2000); //Fade In, then delay 2000 then fade Out
+					
+				}else{
+					$('.alert-danger > span').html('');
+					$('.alert-danger > span').append(msg.name+' left the chat, total no. of participants are '+msg.count);
+					$('.alert-danger').fadeIn(1500).delay(2000).fadeOut(2000);//Fade In, then delay 2000 then fade Out
+					
+				}
+			});
+			
+	</script>
+    <script src="js/jquery-1.11.3.min.js"></script>
+</body>
+</html>
+
