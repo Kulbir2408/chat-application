@@ -1,6 +1,6 @@
 ##chat-application
 ######@author    :  Kulbir
-######@techs     :  node.js(express framework), socket.io, jQuery, LESS, Gulp, Bower.
+######@techs     :  node.js(express framework), socket.io, Gulp, Bower, jQuery, LESS, Bootstrap.
 
 -This is a chat application written in node.JS using Express Framework and socket.io. 
 
